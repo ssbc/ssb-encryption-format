@@ -36,7 +36,6 @@ check(myEncryptionFormat, (err) => {
 An **encryption format** specifies how to encrypt and decrypt JavaScript buffers (these could be SSB messages from _any_ feed format) using a particular encryption scheme and algorithms. Every encryption format is a plugin-like object with:
 
 - `name`
-- `suffix`
 - `setup(config, cb)`
 - `encrypt(plaintext, opts)`
 - `decrypt(ciphertext, opts)`
@@ -47,11 +46,9 @@ Your encryption format must include these properties:
 
 ### `name`
 
-A **string** to name this format. Try to use computer-friendly names, not human-friendly names. Avoid spaces, and prefer lowercase and short unique names.
+A **string** to name this format. Try to use computer-friendly names, not human-friendly names. Avoid spaces and select short unique names.
 
-### `suffix`
-
-A **string** to append to the ciphertexts when they are base64-stringified. Do **NOT** include a dot here, use only lowercase alphanumeric characters that make up a computer-friendly name.
+The name will also be appended to the ciphertexts when they are base64-stringified. Do **NOT** include a dot in the name, use only lowercase alphanumeric characters.
 
 ### `setup(config, cb)`
 

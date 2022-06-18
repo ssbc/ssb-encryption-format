@@ -7,7 +7,6 @@ const ssbKeys = require('ssb-keys');
 /**
  * @typedef {Object} EncryptionFormat
  * @property {string} name
- * @property {string} suffix
  * @property {CallableFunction=} setup
  * @property {(plaintext: Buffer, opts: Record<string, any>) => Buffer} encrypt
  * @property {(ciphertext: Buffer, opts: Record<string, any>) => Buffer} decrypt
@@ -20,11 +19,6 @@ function assertHasAllRequiredProps(ef) {
   if (!ef.name || typeof ef.name !== 'string') {
     // prettier-ignore
     throw new Error('Your encryption format requires the field "name" as a string');
-  }
-
-  if (!ef.suffix || typeof ef.suffix !== 'string') {
-    // prettier-ignore
-    throw new Error(`Your encryption format "${ef.name}" requires the field "suffix" as a string`);
   }
 
   if (!ef.encrypt || typeof ef.encrypt !== 'function') {
@@ -41,14 +35,14 @@ function assertHasAllRequiredProps(ef) {
 /**
  * @param {EncryptionFormat} ef
  */
-function assertSuffix(ef) {
-  if (ef.suffix.includes('.')) {
+function assertName(ef) {
+  if (ef.name.includes('.')) {
     // prettier-ignore
-    throw new Error(`Your encryption format "${ef.name}" has a suffix "${ef.suffix}" with a dot. This is not allowed.`);
+    throw new Error(`Your encryption format "${ef.name}" has a name "${ef.name}" with a dot. This is not allowed.`);
   }
-  if (!ef.suffix.match(/^[a-z0-9]+$/)) {
+  if (!ef.name.match(/^[a-z0-9]+$/)) {
     // prettier-ignore
-    throw new Error(`Your encryption format "${ef.name}" has a suffix "${ef.suffix}" with invalid characters. This is not allowed.`);
+    throw new Error(`Your encryption format "${ef.name}" has a name "${ef.name}" with invalid characters. This is not allowed.`);
   }
 }
 
@@ -110,7 +104,7 @@ function check(encryptionFormat, cb) {
   setup(mockConfig, () => {
     try {
       assertHasAllRequiredProps(encryptionFormat);
-      assertSuffix(encryptionFormat);
+      assertName(encryptionFormat);
       assertEncryptReturnsBuffer(encryptionFormat);
       assertDecryptReturnsBuffer(encryptionFormat);
       assertEncryptDecrypt(encryptionFormat);

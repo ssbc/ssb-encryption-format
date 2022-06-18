@@ -15,24 +15,10 @@ test('name missing', (t) => {
   });
 });
 
-test('suffix missing', (t) => {
-  check(
-    {
-      name: 'cool',
-    },
-    (err) => {
-      t.ok(err);
-      t.match(err.message, /requires the field "suffix" as a string/);
-      t.end();
-    },
-  );
-});
-
 test('encrypt missing', (t) => {
   check(
     {
       name: 'cool',
-      suffix: 'cool',
     },
     (err) => {
       t.ok(err);
@@ -46,7 +32,6 @@ test('decrypt missing', (t) => {
   check(
     {
       name: 'cool',
-      suffix: 'cool',
       encrypt: () => {},
     },
     (err) => {
@@ -57,33 +42,31 @@ test('decrypt missing', (t) => {
   );
 });
 
-test('suffix cannot have dot', (t) => {
+test('name cannot have dot', (t) => {
   check(
     {
-      name: 'cool',
-      suffix: '.cool',
+      name: '.cool',
       encrypt: () => {},
       decrypt: () => {},
     },
     (err) => {
       t.ok(err);
-      t.match(err.message, /has a suffix ".cool" with a dot/);
+      t.match(err.message, /has a name ".cool" with a dot/);
       t.end();
     },
   );
 });
 
-test('suffix cannot have weird characters', (t) => {
+test('name cannot have weird characters', (t) => {
   check(
     {
-      name: 'cool',
-      suffix: 'c#ool',
+      name: 'c#ool',
       encrypt: () => {},
       decrypt: () => {},
     },
     (err) => {
       t.ok(err);
-      t.match(err.message, /has a suffix "c#ool" with invalid characters/);
+      t.match(err.message, /has a name "c#ool" with invalid characters/);
       t.end();
     },
   );
@@ -93,7 +76,6 @@ test('encrypt() must return a buffer', (t) => {
   check(
     {
       name: 'cool',
-      suffix: 'cool',
       encrypt: () => {},
       decrypt: () => {},
     },
@@ -109,7 +91,6 @@ test('decrypt() must return a buffer', (t) => {
   check(
     {
       name: 'cool',
-      suffix: 'cool',
       encrypt: () => Buffer.from([1, 2, 3]),
       decrypt: () => {},
     },
@@ -125,7 +106,6 @@ test('decrypt() must return the same plaintext as encrypt() received', (t) => {
   check(
     {
       name: 'cool',
-      suffix: 'cool',
       encrypt: () => Buffer.from([1, 2, 3]),
       decrypt: () => Buffer.from([9, 8, 7]),
     },

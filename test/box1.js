@@ -12,7 +12,6 @@ let setupCalled = false;
 
 const encryptionFormat = {
   name: 'foo',
-  suffix: 'foo',
 
   setup(config, cb) {
     setTimeout(() => {
