@@ -31,6 +31,18 @@ check(myEncryptionFormat, (err) => {
 });
 ```
 
+In case your encryption format implement `setup()`, then you can also pass an `onSetup` function as an argument to `check()`. This is useful in case you need to do some extra preparation _after_ `setup()` but before `encrypt()`/`decrypt()` is run:
+
+```js
+function onSetup() {
+  myEncryptionFormat.prepareSomething();
+}
+
+check(myEncryptionFormat, onSetup, (err) => {
+  // ...
+});
+```
+
 ## Spec
 
 An **encryption format** specifies how to encrypt and decrypt JavaScript buffers (these could be SSB messages from _any_ feed format) using a particular encryption scheme and algorithms. Every encryption format is a plugin-like object with:

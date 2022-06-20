@@ -4,6 +4,9 @@
 
 const ssbKeys = require('ssb-keys');
 
+/** Example from the protocol guide */
+const PREVIOUS = '%XphMUkWQtomKjXQvFGfsGYpt69sgEY7Y4Vou9cEuJho=.sha256';
+
 /**
  * @typedef {Object} EncryptionFormat
  * @property {string} name
@@ -48,10 +51,10 @@ function assertName(ef) {
 
 /**
  * @param {EncryptionFormat} ef
+ * @param {any} keys
  */
-function assertEncryptReturnsBuffer(ef) {
-  const keys = ssbKeys.generate();
-  const opts = {recps: [keys.id], keys};
+function assertEncryptReturnsBuffer(ef, keys) {
+  const opts = {recps: [keys.id], keys, previous: PREVIOUS};
   const plaintext = Buffer.from('hello world', 'utf-8');
   const ciphertext = ef.encrypt(plaintext, opts);
   if (!Buffer.isBuffer(ciphertext)) {
@@ -62,10 +65,10 @@ function assertEncryptReturnsBuffer(ef) {
 
 /**
  * @param {EncryptionFormat} ef
+ * @param {any} keys
  */
-function assertDecryptReturnsBuffer(ef) {
-  const keys = ssbKeys.generate();
-  const opts = {recps: [keys.id], keys};
+function assertDecryptReturnsBuffer(ef, keys) {
+  const opts = {recps: [keys.id], keys, previous: PREVIOUS, author: keys.id};
   const plaintext = Buffer.from('hello world', 'utf-8');
   const ciphertext = ef.encrypt(plaintext, opts);
   const plaintext2 = ef.decrypt(ciphertext, opts);
@@ -77,10 +80,10 @@ function assertDecryptReturnsBuffer(ef) {
 
 /**
  * @param {EncryptionFormat} ef
+ * @param {any} keys
  */
-function assertEncryptDecrypt(ef) {
-  const keys = ssbKeys.generate();
-  const opts = {recps: [keys.id], keys: keys};
+function assertEncryptDecrypt(ef, keys) {
+  const opts = {recps: [keys.id], keys, previous: PREVIOUS, author: keys.id};
   const plaintext = Buffer.from('hello world', 'utf-8');
   const ciphertext = ef.encrypt(plaintext, opts);
   const plaintext2 = ef.decrypt(ciphertext, opts);
@@ -96,18 +99,22 @@ function assertEncryptDecrypt(ef) {
  * @param {CallableFunction} cb
  * @returns {undefined}
  */
-function check(encryptionFormat, cb) {
+function check(encryptionFormat, ...args) {
+  const onSetup = args[1] ? args[0] : () => {}
+  const cb = args[1] ? args[1] : args[0]
   const setup = encryptionFormat.setup
     ? encryptionFormat.setup.bind(encryptionFormat)
     : (config, cb2) => cb2();
-  const mockConfig = {};
+  const keys = ssbKeys.generate();
+  const mockConfig = {keys};
   setup(mockConfig, () => {
+    if (setup) onSetup()
     try {
       assertHasAllRequiredProps(encryptionFormat);
       assertName(encryptionFormat);
-      assertEncryptReturnsBuffer(encryptionFormat);
-      assertDecryptReturnsBuffer(encryptionFormat);
-      assertEncryptDecrypt(encryptionFormat);
+      assertEncryptReturnsBuffer(encryptionFormat, keys);
+      assertDecryptReturnsBuffer(encryptionFormat, keys);
+      assertEncryptDecrypt(encryptionFormat, keys);
     } catch (err) {
       cb(err);
       return;
