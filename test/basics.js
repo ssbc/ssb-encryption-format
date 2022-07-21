@@ -3,8 +3,6 @@
 // SPDX-License-Identifier: CC0-1.0
 
 const test = require('tape');
-const ssbKeys = require('ssb-keys');
-const Ref = require('ssb-ref');
 const {check} = require('../');
 
 test('name missing', (t) => {

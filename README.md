@@ -49,6 +49,7 @@ An **encryption format** specifies how to encrypt and decrypt JavaScript buffers
 
 - `name`
 - `setup(config, cb)`
+- `teardown(config, cb)`
 - `encrypt(plaintext, opts)`
 - `decrypt(ciphertext, opts)`
 
@@ -67,6 +68,10 @@ The name will also be appended to the ciphertexts when they are base64-stringifi
 An **OPTIONAL** function that you can use to asynchronously setup your encryption format. This function is called when the encryption format is installed in ssb-db2.
 
 The `config` argument is the same config object that usually comes from secret-stack, and the `cb` is a function you call with zero arguments once your setup has completed.
+
+### `teardown(cb)`
+
+An **OPTIONAL** function that you can use to asynchronously teardown your encryption format. This function is called when the encryption format is no longer needed in ssb-db2 or when the ssb instance is closed.
 
 ### `encrypt(plaintext, opts)`
 

@@ -2,15 +2,16 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-only
 
-const ssbKeys = require('ssb-keys');
+const ssbKeys = require("ssb-keys");
 
 /** Example from the protocol guide */
-const PREVIOUS = '%XphMUkWQtomKjXQvFGfsGYpt69sgEY7Y4Vou9cEuJho=.sha256';
+const PREVIOUS = "%XphMUkWQtomKjXQvFGfsGYpt69sgEY7Y4Vou9cEuJho=.sha256";
 
 /**
  * @typedef {Object} EncryptionFormat
  * @property {string} name
  * @property {CallableFunction=} setup
+ * @property {CallableFunction=} teardown
  * @property {(plaintext: Buffer, opts: Record<string, any>) => Buffer} encrypt
  * @property {(ciphertext: Buffer, opts: Record<string, any>) => Buffer} decrypt
  */
@@ -19,17 +20,17 @@ const PREVIOUS = '%XphMUkWQtomKjXQvFGfsGYpt69sgEY7Y4Vou9cEuJho=.sha256';
  * @param {EncryptionFormat} ef
  */
 function assertHasAllRequiredProps(ef) {
-  if (!ef.name || typeof ef.name !== 'string') {
+  if (!ef.name || typeof ef.name !== "string") {
     // prettier-ignore
     throw new Error('Your encryption format requires the field "name" as a string');
   }
 
-  if (!ef.encrypt || typeof ef.encrypt !== 'function') {
+  if (!ef.encrypt || typeof ef.encrypt !== "function") {
     // prettier-ignore
     throw new Error(`Your encryption format "${ef.name}" requires the function "encrypt()"`);
   }
 
-  if (!ef.decrypt || typeof ef.decrypt !== 'function') {
+  if (!ef.decrypt || typeof ef.decrypt !== "function") {
     // prettier-ignore
     throw new Error(`Your encryption format "${ef.name}" requires the function "decrypt()"`);
   }
@@ -39,7 +40,7 @@ function assertHasAllRequiredProps(ef) {
  * @param {EncryptionFormat} ef
  */
 function assertName(ef) {
-  if (ef.name.includes('.')) {
+  if (ef.name.includes(".")) {
     // prettier-ignore
     throw new Error(`Your encryption format "${ef.name}" has a name "${ef.name}" with a dot. This is not allowed.`);
   }
@@ -54,8 +55,8 @@ function assertName(ef) {
  * @param {any} keys
  */
 function assertEncryptReturnsBuffer(ef, keys) {
-  const opts = {recps: [keys.id], keys, previous: PREVIOUS};
-  const plaintext = Buffer.from('hello world', 'utf-8');
+  const opts = { recps: [keys.id], keys, previous: PREVIOUS };
+  const plaintext = Buffer.from("hello world", "utf-8");
   const ciphertext = ef.encrypt(plaintext, opts);
   if (!Buffer.isBuffer(ciphertext)) {
     // prettier-ignore
@@ -68,8 +69,8 @@ function assertEncryptReturnsBuffer(ef, keys) {
  * @param {any} keys
  */
 function assertDecryptReturnsBuffer(ef, keys) {
-  const opts = {recps: [keys.id], keys, previous: PREVIOUS, author: keys.id};
-  const plaintext = Buffer.from('hello world', 'utf-8');
+  const opts = { recps: [keys.id], keys, previous: PREVIOUS, author: keys.id };
+  const plaintext = Buffer.from("hello world", "utf-8");
   const ciphertext = ef.encrypt(plaintext, opts);
   const plaintext2 = ef.decrypt(ciphertext, opts);
   if (!Buffer.isBuffer(plaintext2)) {
@@ -83,8 +84,8 @@ function assertDecryptReturnsBuffer(ef, keys) {
  * @param {any} keys
  */
 function assertEncryptDecrypt(ef, keys) {
-  const opts = {recps: [keys.id], keys, previous: PREVIOUS, author: keys.id};
-  const plaintext = Buffer.from('hello world', 'utf-8');
+  const opts = { recps: [keys.id], keys, previous: PREVIOUS, author: keys.id };
+  const plaintext = Buffer.from("hello world", "utf-8");
   const ciphertext = ef.encrypt(plaintext, opts);
   const plaintext2 = ef.decrypt(ciphertext, opts);
   if (!plaintext2.equals(plaintext)) {
@@ -100,15 +101,15 @@ function assertEncryptDecrypt(ef, keys) {
  * @returns {undefined}
  */
 function check(encryptionFormat, ...args) {
-  const onSetup = args[1] ? args[0] : () => {}
-  const cb = args[1] ? args[1] : args[0]
+  const onSetup = args[1] ? args[0] : () => {};
+  const cb = args[1] ? args[1] : args[0];
   const setup = encryptionFormat.setup
     ? encryptionFormat.setup.bind(encryptionFormat)
     : (config, cb2) => cb2();
   const keys = ssbKeys.generate();
-  const mockConfig = {keys};
+  const mockConfig = { keys };
   setup(mockConfig, () => {
-    if (setup) onSetup()
+    if (setup) onSetup();
     try {
       assertHasAllRequiredProps(encryptionFormat);
       assertName(encryptionFormat);
@@ -119,7 +120,11 @@ function check(encryptionFormat, ...args) {
       cb(err);
       return;
     }
-    cb();
+    if (encryptionFormat.teardown) {
+      encryptionFormat.teardown(cb);
+    } else {
+      cb();
+    }
   });
 }
 

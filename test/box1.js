@@ -9,6 +9,7 @@ const privateBox = require('private-box');
 const {check} = require('../');
 
 let setupCalled = false;
+let teardownCalled = false;
 
 const encryptionFormat = {
   name: 'foo',
@@ -16,6 +17,13 @@ const encryptionFormat = {
   setup(config, cb) {
     setTimeout(() => {
       setupCalled = true;
+      cb();
+    }, 100)
+  },
+
+  teardown(cb) {
+    setTimeout(() => {
+      teardownCalled = true;
       cb();
     }, 100)
   },
@@ -78,6 +86,7 @@ test('corrupted encrypt is detected', (t) => {
   check(corruptedFormat, (err) => {
     t.ok(err);
     t.true(setupCalled, 'setup() was called');
+    t.true(teardownCalled, 'teardown() was called');
     t.end();
   });
 });
