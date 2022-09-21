@@ -80,7 +80,7 @@ Takes a `plaintext` as a Buffer and `opts` object and MUST return a Buffer repre
 You can assume `opts` has the following properties:
 
 - `opts.keys`: the "ssb-keys"-style cryptographic keypair object of the current SSB peer
-- `opts.recps`: an array of public keys (usually strings such as sigil IDs or SSB URIs) of the recipients of the ciphertext
+- `opts.recps`: an array of identifiers (*usually* strings such as sigil IDs or SSB URIs) of the recipients of the ciphertext
 - `opts.previous`: a **string** representing the message ID of the previous SSB message before this plaintext
 
 ### `decrypt(ciphertext, opts)`
